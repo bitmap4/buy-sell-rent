@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect, useMemo } from "react"
 import { SearchBar } from "./search-bar2";
 import { Card, Image, Text } from "@chakra-ui/react"
 import { Button } from "@/components/ui/button"
@@ -8,10 +9,64 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((product:any) => {
+      const searchLower = searchQuery.toLowerCase()
+      return (
+        product.name.toLowerCase().includes(searchLower) ||
+        product.description.toLowerCase().includes(searchLower) ||
+        product.tags.some((tag: string) => tag.toLowerCase().includes(searchLower))
+      )
+    })
+  }, [products, searchQuery])
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          router.push('/login')
+          return
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/itemS`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error)
+        
+        setProducts(data.items.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          tags: item.tags || [],
+          image: item.image || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc"
+        })))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load items')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchItems()
+  }, [])
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>Error: {error}</div>
 
   return (<>
     <div className="flex w-full justify-center px-6 md:px-10 pt-6 md:pt-10">
-      <SearchBar />
+      <SearchBar value={searchQuery} onChange={setSearchQuery} />
     </div>
     <div className="px-6 md:px-10">
       <Text textStyle="xs" letterSpacing="tight" color="gray.emphasized" mt="1">
@@ -20,14 +75,14 @@ export default function Page() {
       <Tags tags={tags} />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 md:p-10">
-      {products.map((product, i) => (
+      {filteredProducts.map((product: any, i) => (
         <Card.Root 
           maxW="sm" 
           overflow="hidden" 
           key={i}
           onClick={() => router.push(`/item/${product.id}`)}
           cursor="pointer"
-          _hover={{ transform: 'scale(1.2)' }}
+          _hover={{ transform: 'scale(1.02)' }}
           transition="all 0.2s"
         >
           <Image
@@ -53,59 +108,6 @@ export default function Page() {
     </div>
   </>);
 }
-
-const products = [
-  {
-    id: 0,
-    name: "Living room Sofa",
-    description:
-      "This sofa is perfect for modern tropical spaces, baroque inspired spaces.",
-    price: 450,
-    tags: ["furniture", "home"],
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
-  },
-  {
-    id: 1,
-    name: "Modern Chair",
-    description:
-      "This chair is perfect for modern tropical spaces, baroque inspired spaces.",
-    price: 150,
-    tags: ["furniture", "chair"],
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
-  },
-  {
-    id: 2,
-    name: "Wooden Table",
-    description:
-      "This table is perfect for modern tropical spaces, baroque inspired spaces.",
-    price: 250,
-    tags: ["furniture", "table"],
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
-  },
-  {
-    id: 3,
-    name: "Modern Lamp",
-    description:
-      "This lamp is perfect for modern tropical spaces, baroque inspired spaces.",
-    price: 50,
-    tags: ["light", "lamp"],
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
-  },
-  {
-    id: 4,
-    name: "Modern Lamp",
-    description:
-      "This lamp is perfect for modern tropical spaces, baroque inspired spaces.",
-    price: 50,
-    tags: ["furniture", "lamp"],
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80",
-  }
-];
 
 const tags = [
   "furniture",

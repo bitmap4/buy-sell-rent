@@ -1,9 +1,19 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useCallback } from "react";
+import { debounce } from "lodash";
 
-// search bar with input box and search icon on the left
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-export function SearchBar() {
+export function SearchBar({ value, onChange }: SearchBarProps) {
+    const debouncedOnChange = useCallback(
+        debounce((value: string) => onChange(value), 300),
+        [onChange]
+    );
+
     return (
         <div className="flex w-full h-10 items-center rounded-md border border-input pl-3 
                         text-sm ring-offset-background focus-within:ring-1 focus-within:ring-ring 
@@ -15,13 +25,12 @@ export function SearchBar() {
                 type="text"
                 placeholder="Search..."
                 className="w-full p-2 border-none placeholder:text-muted-foreground focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
+                value={value}
+                onChange={(e) => {
+                    onChange(e.target.value);
+                    debouncedOnChange(e.target.value);
+                }}
             />
         </div>
     )
 }
-
-// flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm 
-// transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium 
-// file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none 
-// focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 
-// md:text-sm w-full

@@ -6,6 +6,7 @@ const generateToken = (user) => {
 };
 
 exports.register = async (req, res) => {
+  console.log(req.body);
   try {
     const { firstName, lastName, email, age, contactNumber, password } = req.body;
     const user = await User.create({

@@ -1,25 +1,94 @@
 "use client"
 
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardHeader, CardFooter, CardTitle, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
 
-// export function ProfileForm({
-//     className,
-//     ...props
-// }: React.ComponentPropsWithoutRef<"div">) {
-export function Profile(){
+export function Profile() {
     const [editing, setEditing] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState("")
+    const [userData, setUserData] = useState({
+        name: "",
+        email: "",
+        firstName: "",
+        lastName: ""
+    })
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const token = localStorage.getItem('token')
+                if (!token) {
+                    window.location.href = '/login'
+                    return
+                }
+
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http:localhost:3000"}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                const data = await response.json()
+                
+                if (!response.ok) throw new Error(data.error)
+
+                setUserData({
+                    name: `${data.user.firstName} ${data.user.lastName}`,
+                    email: data.user.email,
+                    firstName: data.user.firstName,
+                    lastName: data.user.lastName
+                })
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load user data')
+            }
+        }
+
+        fetchUserData()
+    }, [])
+
+    const handleSubmit = async () => {
+        setLoading(true)
+        setError("")
+        
+        try {
+            const token = localStorage.getItem('token')
+            if (!token) {
+                window.location.href = '/login'
+                return
+            }
+
+            const [firstName, lastName] = userData.name.split(' ')
+
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http:localhost:3000"}/api/auth/me`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName
+                })
+            })
+
+            const data = await response.json()
+            if (!response.ok) throw new Error(data.error)
+
+            setEditing(false)
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to update profile')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="text-2xl">Profile</CardTitle>
-                {/* <CardDescription>
-                    Update your profile
-                </CardDescription> */}
+                {error && <p className="text-red-500 text-sm">{error}</p>}
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col gap-6">
@@ -28,9 +97,10 @@ export function Profile(){
                         <Input
                             id="name"
                             type="text"
-                            value="Abhyudit Singh"
+                            value={userData.name}
+                            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                             required
-                            {...(editing ? { readOnly: false } : { readOnly: true })}
+                            readOnly={!editing}
                             className={editing ? "" : "border-none"}
                         />
                     </div>
@@ -39,22 +109,23 @@ export function Profile(){
                         <Input
                             id="email"
                             type="email"
-                            value="abhyudit.singh@research.iiit.ac.in"
+                            value={userData.email}
                             required
-                            {...(editing ? { readOnly: false } : { readOnly: true })}
-                            className={editing ? "" : "border-none"}
+                            readOnly
+                            className="border-none"
                         />
                     </div>
                 </div>
             </CardContent>
             <CardFooter>
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-6 w-full">
                     <Button
                         type="button"
-                        onClick={() => setEditing(!editing)}
+                        onClick={() => editing ? handleSubmit() : setEditing(true)}
+                        disabled={loading}
                         className="w-full"
                     >
-                        {editing ? "Save" : "Edit"}
+                        {loading ? "Saving..." : editing ? "Save" : "Edit"}
                     </Button>
                 </div>
             </CardFooter>
