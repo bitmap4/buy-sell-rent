@@ -1,6 +1,6 @@
 ## API Documentation
 
-1. [Auth](./docs/user.md)
+1. [Auth](./docs/auth.md)
 2. [Cart](./docs/cart.md)
 3. [Delivery](./docs/delivery.md)
 4. [Order](./docs/order.md)
