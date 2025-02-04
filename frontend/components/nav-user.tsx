@@ -47,40 +47,62 @@ export function NavUser() {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [rating, setRating] = useState<number>()
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem('token')
         if (!token) {
+          localStorage.removeItem('token')
           window.location.href = '/login'
           return
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`, {
+        // Fetch profile data
+        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         })
-        const data = await response.json()
+        const profileData = await profileResponse.json()
         
-        if (!response.ok) throw new Error(data.error)
+        if (!profileResponse.ok) {
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+          throw new Error(profileData.error)
+        }
 
+        // Fetch user details with reviews
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const userData = await userResponse.json()
+        if (!userResponse.ok) throw new Error(userData.error)
+
+        // Calculate average rating
+        const reviews = userData.user.sellerReviews || []
+        const avgRating = reviews.length 
+          ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length
+          : undefined
+
+        setRating(avgRating)
         setUserData({
-          name: `${data.user.firstName} ${data.user.lastName}`,
-          email: data.user.email,
-          avatar: data.user.avatar || ""
+          name: `${profileData.user.firstName} ${profileData.user.lastName}`,
+          email: profileData.user.email,
+          avatar: profileData.user.avatar || ""
         })
 
         setProfileValues({
-          fname: data.user.firstName,
-          lname: data.user.lastName,
-          email: data.user.email,
-          age: data.user.age.toString(),
-          phone: data.user.contactNumber
+          fname: profileData.user.firstName,
+          lname: profileData.user.lastName,
+          email: profileData.user.email,
+          age: profileData.user.age.toString(),
+          phone: profileData.user.contactNumber
         })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load user data')
+        localStorage.removeItem('token')
+        window.location.href = '/login'
       } finally {
         setLoading(false)
       }
@@ -126,7 +148,10 @@ export function NavUser() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 mb-1 font-normal">
-              <ProfileCard watchedValues={profileValues} />
+              <ProfileCard 
+                watchedValues={profileValues} 
+                rating={rating}
+              />
             </DropdownMenuLabel>
             <DropdownMenuGroup>
               <Link href="/settings">

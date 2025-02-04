@@ -82,7 +82,7 @@ export function OrdersList({ type }: OrdersListProps) {
                                 : `${order.seller.firstName} ${order.seller.lastName}`}
                         </TableCell>
                         <TableCell>{order.status}</TableCell>
-                        <TableCell className="text-right">${order.total}</TableCell>
+                        <TableCell className="text-right">₹{order.total}</TableCell>
                     </TableRow>
                 ))}
             </TableBody>

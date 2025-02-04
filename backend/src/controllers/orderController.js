@@ -107,12 +107,12 @@ exports.completeOrder = async (req, res) => {
     const { otp } = req.body;
     if (!otp) return res.status(400).json({ error: 'OTP is required' });
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId)
+      .populate('items.item');
     if (!order) return res.status(404).json({ error: 'Order not found' });
     if (order.status !== 'pending') {
       return res.status(400).json({ error: 'Order is not pending' });
     }
-    // Only seller can complete order.
     if (order.seller.toString() !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized to complete this order' });
     }
@@ -122,8 +122,28 @@ exports.completeOrder = async (req, res) => {
       return res.status(400).json({ error: 'Invalid OTP' });
     }
 
+    // Update quantities for all items in order
+    for (const orderItem of order.items) {
+      const item = await Item.findById(orderItem.item._id);
+      if (!item) {
+        return res.status(404).json({ 
+          error: `Item ${orderItem.item._id} not found` 
+        });
+      }
+      
+      if (item.quantity < orderItem.quantity) {
+        return res.status(400).json({ 
+          error: `Insufficient quantity for ${item.name}` 
+        });
+      }
+
+      item.quantity -= orderItem.quantity;
+      await item.save();
+    }
+
     order.status = 'completed';
     await order.save();
+
     res.json({ order });
   } catch (error) {
     res.status(500).json({ error: error.message });

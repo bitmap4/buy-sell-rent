@@ -21,18 +21,9 @@ const formSchema = z.object({
 })
 
 export default function SettingsPage() {
-  // const form = useForm<z.infer<typeof formSchema>>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     fname: "Abhyudit",
-  //     lname: "Singh",
-  //     email: "abhyudit.singh@research.iiit.ac.in",
-  //     age: "18",
-  //     phone: "1337001337"
-  //   },
-  // })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [rating, setRating] = useState<number>()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,21 +45,33 @@ export default function SettingsPage() {
           return
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000"}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        // Fetch user profile
+        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         })
-        const data = await response.json()
+        const profileData = await profileResponse.json()
+        if (!profileResponse.ok) throw new Error(profileData.error)
 
-        if (!response.ok) throw new Error(data.error)
+        // Fetch user details including reviews
+        const userResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        const userData = await userResponse.json()
+        if (!userResponse.ok) throw new Error(userData.error)
 
+        // Calculate average rating
+        const reviews = userData.user.sellerReviews || []
+        const avgRating = reviews.length 
+          ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length
+          : undefined
+
+        setRating(avgRating)
         form.reset({
-          fname: data.user.firstName,
-          lname: data.user.lastName,
-          email: data.user.email,
-          age: data.user.age.toString(),
-          phone: data.user.contactNumber
+          fname: profileData.user.firstName,
+          lname: profileData.user.lastName,
+          email: profileData.user.email,
+          age: profileData.user.age.toString(),
+          phone: profileData.user.contactNumber
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load user data')
@@ -150,7 +153,10 @@ export default function SettingsPage() {
 
       <GridItem position="sticky" top={4}>
         <Text fontSize="md" fontWeight="bold" marginBottom="0.5rem">Preview</Text>
-        <ProfileCard watchedValues={watchedValues} />
+        <ProfileCard 
+          watchedValues={watchedValues}
+          rating={rating}
+        />
       </GridItem>
     </Grid>
   )

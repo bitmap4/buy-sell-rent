@@ -2,11 +2,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Card } from "@chakra-ui/react"
 import {    VStack, Text } from "@chakra-ui/react"
 
-type ProfileCardProps = {
-    watchedValues: any
+interface ProfileCardProps {
+    watchedValues: {
+        fname: string
+        lname: string
+        email: string
+        age: string
+        phone: number | string
+    }
+    rating?: number
 }
 
-export function ProfileCard({ watchedValues }: ProfileCardProps) {
+export function ProfileCard({ watchedValues, rating }: ProfileCardProps) {
     const name = watchedValues.fname + " " + watchedValues.lname
 
     return (
@@ -21,6 +28,11 @@ export function ProfileCard({ watchedValues }: ProfileCardProps) {
                 <VStack gap={4} align="center">
                     <Text fontSize="xl" fontWeight="bold">{name || "Your Name"}</Text>
                     <Text color="gray.500">{watchedValues.email || "N/A"}</Text>
+                    {rating !== undefined && (
+                        <Text fontSize="sm" color="gray.600">
+                            Seller Rating: {rating.toFixed(1)} / 5
+                        </Text>
+                    )}
                     <VStack align="left" width="full">
                         Age
                         <Text color="gray.500">{watchedValues.age || "N/A"}</Text>

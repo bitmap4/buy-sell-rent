@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { Provider } from "@/components/ui/provider";
 import "./globals.css";
+import { Support } from "@/components/support";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,6 +51,7 @@ export default function RootLayout({
             </SidebarProvider>
           </div>
           
+          <Support />
         </Provider>
       </body>
     </html>

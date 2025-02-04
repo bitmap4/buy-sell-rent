@@ -1,9 +1,15 @@
 "use client"
 
-import { Flex, Link, Image, Stack, Text, Grid, Separator } from "@chakra-ui/react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Trash } from "lucide-react"
+import { Stack, Text, Grid, Image, Link } from "@chakra-ui/react"
+import {
+  SelectContent,
+  SelectItem,
+  SelectLabel,
+  SelectRoot,
+  SelectTrigger,
+  SelectValueText,
+} from "@/components/ui/select"
+import { createListCollection } from "@chakra-ui/react"
 
 interface CartItemProps {
     item: {
@@ -11,17 +17,27 @@ interface CartItemProps {
         name: string
         price: number
         quantity: number
-        image?: string
+        maxQuantity: number
+        images?: [string]
     }
     onRemove: () => void
     onUpdateQuantity: (quantity: number) => void
 }
 
 export function CartItem({ item, onRemove, onUpdateQuantity }: CartItemProps) {
+    const quantities = createListCollection({
+        items: Array.from({ length: item.maxQuantity }, (_, i) => ({
+            value: i + 1,
+            label: i + 1
+        })),
+        itemToString: (item) => String(item.label),
+        itemToValue: (item) => String(item.value),
+    })
+
     return (
         <Grid templateColumns={{ base: "100px 1fr", lg: "100px 1fr 100px" }} gap={8} p="4">
             <Image
-                src={item.image || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc"}
+                src={(item.images || ["https://images.unsplash.com/photo-1555041469-a586c61ea9bc"])[0]}
                 alt={item.name}
                 width={100}
                 height={100}
@@ -35,13 +51,32 @@ export function CartItem({ item, onRemove, onUpdateQuantity }: CartItemProps) {
                 </Link>
             </Stack>
             <Stack gap={2} minW="100px" direction={{ base: "row", lg: "column" }}>
-                <Input 
-                    type="number" 
-                    value={item.quantity}
-                    min={1}
-                    onChange={(e) => onUpdateQuantity(parseInt(e.target.value))}
-                />
-                <Text fontWeight="medium">${item.price}</Text>
+                <SelectRoot 
+                    collection={quantities}
+                    defaultValue={[String(item.quantity)]}
+                    onValueChange={(item: any) => {
+                        console.log(item.value)
+                        return onUpdateQuantity(parseInt(item.value[0]))}}
+                    size="sm"
+                    width="64px"
+                >
+                    {/* <SelectLabel>Quantity</SelectLabel> */}
+                    <SelectTrigger className="border rounded-md px-2">
+                        <SelectValueText />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {quantities.items.map((quantityOption) => (
+                            <SelectItem
+                                key={quantityOption.value}
+                                item={quantityOption}
+                                px={2}
+                            >
+                                {quantityOption.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </SelectRoot>
+                <Text fontWeight="medium">₹{item.price}</Text>
             </Stack>
         </Grid>
     )

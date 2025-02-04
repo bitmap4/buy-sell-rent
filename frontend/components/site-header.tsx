@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
+import { Link } from "@chakra-ui/react"
 
 const pathMap: Record<string, string> = {
   home: "Home",
@@ -31,6 +32,10 @@ const pathMap: Record<string, string> = {
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar()
   const pathname = usePathname()
+
+  if (pathname === "/login" || pathname === "/signup") {
+    return null
+  }
   
   // Remove leading slash and split into segments
   const segments = pathname.slice(1).split('/')
@@ -69,10 +74,12 @@ export function SiteHeader() {
         </Breadcrumb>
         {/* <SearchForm className="w-full sm:ml-auto sm:w-auto" /> */}
         {/* add button for adding a new item for selling, along with an icon */}
-        <Button variant="outline" size="sm" className="ml-auto">
-          <Plus className="mr-2" />
-          Sell Item
-        </Button>
+        <Link href="/create" className="ml-auto">
+          <Button variant="outline" size="sm" className="ml-auto">
+            <Plus className="mr-2" />
+            Sell Item
+          </Button>
+        </Link>
         <Button variant="ghost" className="h-8 w-8">
           <Sun />
         </Button>

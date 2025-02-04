@@ -16,7 +16,10 @@ Authorization: Bearer <token>
       "id": "string",
       "name": "string",
       "price": "number",
-      "description": "string"
+      "description": "string",
+      "images": ["string"],
+      "tags": ["string"],
+      "sellerId": "string",
     }
   ]
 }
@@ -31,7 +34,10 @@ Authorization: Bearer <token>
       "id": "507f1f77bcf86cd799439011",
       "name": "Coffee Mug",
       "price": 9.99,
-      "description": "A ceramic coffee mug"
+      "description": "A ceramic coffee mug",
+      "images": ["https://example.com/image.jpg"],
+      "tags": ["coffee", "mug"],
+      "sellerId": "507f1f77bcf86cd799439012"
     }
   ]
 }
@@ -50,7 +56,10 @@ Authorization: Bearer <token>
 {
   "name": "string",
   "price": "number",
-  "description": "string"
+  "description": "string",
+  "images": ["string"],
+  "tags": ["string"],
+  "sellerId": "string",
 }
 ```
 
@@ -61,7 +70,10 @@ Authorization: Bearer <token>
     "id": "string",
     "name": "string",
     "price": "number",
-    "description": "string"
+    "description": "string",
+    "images": ["string"],
+    "tags": ["string"],
+    "sellerId": "string",
   }
 }
 ```
@@ -72,7 +84,10 @@ Authorization: Bearer <token>
 {
   "name": "Coffee Mug",
   "price": 9.99,
-  "description": "A ceramic coffee mug"
+  "description": "A ceramic coffee mug",
+  "images": ["https://example.com/image.jpg"],
+  "tags": ["coffee", "mug"],
+  "sellerId": "507f1f77bcf86cd799439012"
 }
 
 // Response
@@ -81,7 +96,10 @@ Authorization: Bearer <token>
     "id": "507f1f77bcf86cd799439011",
     "name": "Coffee Mug",
     "price": 9.99,
-    "description": "A ceramic coffee mug"
+    "description": "A ceramic coffee mug",
+    "images": ["https://example.com/image.jpg"],
+    "tags": ["coffee", "mug"],
+    "sellerId": "507f1f77bcf86cd799439012"
   }
 }
 ```
@@ -101,7 +119,10 @@ Authorization: Bearer <token>
     "id": "string",
     "name": "string",
     "price": "number",
-    "description": "string"
+    "description": "string",
+    "images": ["string"],
+    "tags": ["string"],
+    "sellerId": "string",
   }
 }
 ```
@@ -116,7 +137,10 @@ Authorization: Bearer <token>
     "id": "507f1f77bcf86cd799439011",
     "name": "Coffee Mug",
     "price": 9.99,
-    "description": "A ceramic coffee mug"
+    "description": "A ceramic coffee mug",
+    "images": ["https://example.com/image.jpg"],
+    "tags": ["coffee", "mug"],
+    "sellerId": "507f1f77bcf86cd799439012"
   }
 }
 ```
@@ -134,7 +158,10 @@ Authorization: Bearer <token>
 {
   "name": "string",
   "price": "number",
-  "description": "string"
+  "description": "string",
+  "images": ["string"],
+  "tags": ["string"],
+  "sellerId": "string",
 }
 ```
 
@@ -145,7 +172,10 @@ Authorization: Bearer <token>
     "id": "string",
     "name": "string",
     "price": "number",
-    "description": "string"
+    "description": "string",
+    "images": ["string"],
+    "tags": ["string"],
+    "sellerId": "string",
   }
 }
 ```
@@ -165,7 +195,10 @@ Authorization: Bearer <token>
     "id": "507f1f77bcf86cd799439011",
     "name": "Coffee Mug",
     "price": 12.99,
-    "description": "A premium ceramic coffee mug"
+    "description": "A premium ceramic coffee mug",
+    "images": ["https://example.com/image.jpg"],
+    "tags": ["coffee", "mug"],
+    "sellerId": "507f1f77bcf86cd799439012"
   }
 }
 ```

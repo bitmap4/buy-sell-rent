@@ -1,30 +1,20 @@
 "use client"
 
 import { Tag } from "@/components/ui/tag"
-import { useState } from 'react'
 
 type TagsProps = {
-    tags: string[],
+    tags: string[]
+    selectedTags?: string[]
+    onTagSelect?: (tag: string) => void
     disabled?: boolean
 }
 
-export function Tags({ tags, disabled = false }: TagsProps) {
-    const [clickedTags, setClickedTags] = useState<Set<string>>(new Set())
-
-    const handleClick = (tag: string) => {
-        setClickedTags(prev => {
-            const newSet = new Set(prev)
-            if (newSet.has(tag)) {
-                newSet.delete(tag)
-            } else {
-                newSet.add(tag)
-            }
-            return newSet
-        })
-        console.log(`Tag clicked: ${tag}`)
-        // Add your click handler logic here
-    }
-
+export function Tags({ 
+    tags, 
+    selectedTags = [], 
+    onTagSelect, 
+    disabled = false 
+}: TagsProps) {
     if (disabled) {
         return (
             <div className="flex flex-wrap gap-2">
@@ -48,9 +38,9 @@ export function Tags({ tags, disabled = false }: TagsProps) {
                 <Tag
                     key={tag}
                     size="md"
-                    variant={clickedTags.has(tag) ? "solid" : "outline"}
+                    variant={selectedTags.includes(tag) ? "solid" : "outline"}
                     cursor="pointer"
-                    onClick={() => handleClick(tag)}
+                    onClick={() => onTagSelect?.(tag)}
                     _hover={{ opacity: 0.8 }}
                 >
                     {tag}

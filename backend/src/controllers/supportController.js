@@ -1,4 +1,9 @@
 const SupportSession = require('../models/SupportSession');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 // Fetch or create user's current session:
 exports.getSession = async (req, res) => {
@@ -36,8 +41,10 @@ exports.sendMessage = async (req, res) => {
     // Push user message
     session.messages.push({ role: 'user', text: message });
 
-    // Generate a basic static response (placeholder for actual chatbot logic)
-    const chatbotResponse = 'Hello from the support chatbot!';
+    // Get response from Gemini
+    const prompt = `As a customer support agent for an e-commerce platform, respond to: ${message}`;
+    const result = await model.generateContent(prompt);
+    const chatbotResponse = result.response.text();
 
     // Store assistant response
     session.messages.push({ role: 'assistant', text: chatbotResponse });
@@ -45,6 +52,7 @@ exports.sendMessage = async (req, res) => {
     await session.save();
     res.json({ response: chatbotResponse, session });
   } catch (error) {
+    console.error('Gemini API error:', error);
     res.status(500).json({ error: error.message });
   }
 };

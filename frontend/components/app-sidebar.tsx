@@ -18,6 +18,7 @@ import {
   History,
   Truck,
 } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -145,8 +146,8 @@ const data = {
       icon: Home,
     },
     {
-      name: "History",
-      url: "/history",
+      name: "Order History",
+      url: "/orders",
       icon: History,
     },
     {
@@ -163,6 +164,11 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+  if (pathname === "/login" || pathname === "/signup") {
+    return null
+  }
+  
   return (
     <Sidebar variant="floating" {...props} className="top-[--header-height] !h-[calc(100svh-var(--header-height))]">
       <SidebarContent>
